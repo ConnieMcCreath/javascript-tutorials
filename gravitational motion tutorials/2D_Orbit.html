@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+  <head>
+      <meta charset="utf-8">
+      <title>2D Space Debris Orbit</title>
+      <style>
+          body {
+            background-color: #000;
+          }
+          #canvas_debris {
+            background-color: transparent;
+            position:absolute;
+          }
+          #canvas_earth {
+            background-color: #000;
+            position:absolute;
+          }
+        </style>
+  <body>
+  <canvas id="canvas_earth" width="1300" height="600"></canvas>
+  <canvas id="canvas_debris" width="1300" height="600"></canvas>
+  <script src= "objects/vector2D.js"></script>
+  <script src= "objects/Ball.js"></script>
+  <script>
+
+  var canvas_debris = document.getElementById('canvas_debris');
+  var context_debris = canvas_debris.getContext('2d');
+  var canvas_earth = document.getElementById('canvas_earth');
+  var context_earth = canvas_earth.getContext('2d');
+
+  var debris;
+  var earth;
+  var mass_debris = 1;
+  var mass_earth = 1000000;
+  var gravity = 1;
+  var dt = 0.01; // time step;
+
+  // position coordinates of centre
+  var x_earth = 650;
+  var y_earth = 300;
+
+  // initial position coordinates of debris
+  var x_debris = 650;
+  var y_debris = 400;
+
+  // inital velocity of debris
+  var vx_debris = 100;
+  var vy_debris = 0;
+
+  var radius_earth = 50;
+  var radius_debris = 10;
+
+  var color_earth = '#7FFF00';
+  var color_debris = '#D3D3D3';
+
+  window.onload = init;
+
+  function init() {
+
+      // create a stationary earth
+      earth = new Ball(radius_earth,color_earth,mass_earth);
+    	earth.pos2D = new Vector2D(x_earth,y_earth); // earth/certre position vector (r1)
+      earth.draw(context_earth);
+
+      // create a moving debris
+      debris = new Ball(radius_debris, color_debris, mass_debris);
+      debris.pos2D = new Vector2D(x_debris,y_debris);  // debris inital position vector (r2)
+      debris.velo2D = new Vector2D(vx_debris,vy_debris); // debris inital velocity vector (V0)
+      debris.draw(context_debris);
+
+      // make the debris orbit the earth
+      animFrame();
+    };
+
+      function animFrame(){
+        	animId = requestAnimationFrame(animFrame,canvas_debris);
+          moveObject(debris);
+          calcForce();
+          updateAccel();
+          updateVelo(debris);
+  }
+      function Gravity(G,m1,m2,r){
+          return r.multiply(-G*m1*m2/(r.lengthSquared()*r.length())); //r vector * (-G*m1*m2/r^3)
+  }
+      function moveObject(debris){
+          debris.pos2D = debris.pos2D.addScaled(debris.velo2D,dt); // P1 = P0 + V0*dt = new updated podistion vector
+          context_debris.clearRect(0, 0, canvas_debris.width, canvas_debris.height); //erasing debris in previous position
+          debris.draw(context_debris); // redrawing debris in new updated postition
+ }
+      function calcForce(){
+          force = Gravity(gravity,mass_earth,mass_debris,debris.pos2D.subtract(earth.pos2D)); // (r = r2 - r1)
+}
+      function updateAccel(){
+          acc = force.multiply(1/mass_debris); // a = F/m
+}
+      function updateVelo(debris){
+        	debris.velo2D = debris.velo2D.addScaled(acc,dt); // V1 = V0 + a0*dt = new updated velocity vector
+}
+  </script>
+  </body>
+  </html>
